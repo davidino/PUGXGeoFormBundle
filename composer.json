@@ -29,7 +29,8 @@
     },
     "require-dev": {
         "symfony/yaml": "~2.1",
-        "symfony/validator": "~2.1"
+        "symfony/validator": "~2.1",
+        "phake/phake": "1.*"
     },
     "suggest": {
     },

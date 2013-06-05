@@ -15,11 +15,21 @@ class GeoTypeFormTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->formEvent   = $this->getMockBuilder('Symfony\Component\Form\FormEvent')->disableOriginalConstructor()->getMock();
-        $this->form        = $this->getMockBuilder('Symfony\Component\Form\Form')->disableOriginalConstructor()->getMock();
-        $this->dataAdapter = $this->getMockBuilder('PUGX\GeoFormBundle\Adapter\GeoDataAdapterInterface')->getMock();
-        $this->manager     = $this->getMockBuilder('PUGX\GeoFormBundle\Manager\GeoCodeManager')->disableOriginalConstructor()->getMock();
-        $this->location    = $this->getMockBuilder('Geo\Location')->disableOriginalConstructor()->getMock();
+        $this->formEvent   = \Phake::mock('Symfony\Component\Form\FormEvent');
+        //$this->getMockBuilder('Symfony\Component\Form\FormEvent')->disableOriginalConstructor()->getMock();
+
+        $this->form        = \Phake::mock('Symfony\Component\Form\Form');
+        //$this->getMockBuilder('Symfony\Component\Form\Form')->disableOriginalConstructor()->getMock();
+
+        $this->dataAdapter =  \Phake::mock('PUGX\GeoFormBundle\Adapter\GeoDataAdapterInterface');
+        //$this->getMockBuilder('PUGX\GeoFormBundle\Adapter\GeoDataAdapterInterface')->getMock();
+
+        $this->manager     = \Phake::mock('PUGX\GeoFormBundle\Manager\GeoCodeManager');
+        //$this->getMockBuilder('PUGX\GeoFormBundle\Manager\GeoCodeManager')->disableOriginalConstructor()->getMock();
+
+        $this->location    = \Phake::mock('Geo\Location');
+        //$this->getMockBuilder('Geo\Location')->disableOriginalConstructor()->getMock();
+
         $this->listener    = new GeoTypeForm($this->manager, $this->dataAdapter);
     }
 
@@ -30,48 +40,67 @@ class GeoTypeFormTest extends \PHPUnit_Framework_TestCase
             'address' => $address,
         );
 
-        $this->formEvent
+        $this->listener->onFormPreSubmit($this->formEvent);
+
+        /*$this->formEvent
             ->expects($this->once())
             ->method('getData')
-            ->will($this->returnValue($data));
+            ->will($this->returnValue($data));*/
 
-        $this->formEvent
+        \Phake::when($this->formEvent)->getData()->thenReturn($data);
+
+        /*$this->formEvent
             ->expects($this->once())
             ->method('getForm')
-            ->will($this->returnValue($this->form));
+            ->will($this->returnValue($this->form));*/
 
-        $this->dataAdapter
+        \Phake::when($this->formEvent)->getForm()->thenReturn($this->form);
+
+        /*$this->dataAdapter
             ->expects($this->once())
             ->method('getFullAddress')
             ->with($data, $this->form)
-            ->will($this->returnValue($address));
+            ->will($this->returnValue($address));*/
 
-        $this->manager
+        \Phake::when($this->dataAdapter)->getFullAddress($data,$this->form)->thenReturn($address);
+
+        /*$this->manager
             ->expects($this->once())
             ->method('query')
-            ->with($address);
+            ->with($address);*/
 
-        $this->manager
+        \Phake::verify($this->manager)->query($address);
+
+        /*$this->manager
             ->expects($this->once())
             ->method('getFirst')
-            ->will($this->returnValue($this->location));
+            ->will($this->returnValue($this->location));*/
 
-        $this->location
+        \Phake::when($this->manager)->getFirst()->thenReturn($this->location);
+
+        /*$this->location
             ->expects($this->once())
             ->method('getLatitude')
-            ->will($this->returnValue(123));
+            ->will($this->returnValue(123));*/
 
-        $this->location
+        \Phake::when($this->location)->getLatitude()->thenReturn(123);
+
+        /*$this->location
             ->expects($this->once())
             ->method('getLongitude')
-            ->will($this->returnValue(456));
+            ->will($this->returnValue(456));*/
 
-        $this->formEvent
+        \Phake::when($this->location)->getLongitude()->thenReturn(456);
+
+        /*$this->formEvent
             ->expects($this->once())
             ->method('setData')
-            ->with(array('address' => $address, 'latitude' => 123, 'longitude' => 456));
+            ->with(array('address' => $address, 'latitude' => 123, 'longitude' => 456));*/
+
+        \Phake::verify($this->formEvent)->setData(array('address' => $address, 'latitude' => 123, 'longitude' => 456));
 
 
-        $this->listener->onFormPreSubmit($this->formEvent);
+
+
     }
 }
